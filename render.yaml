@@ -1,0 +1,22 @@
+services:
+  - type: worker
+    name: vera-bot-worker
+    env: python
+    plan: starter         # любой платный
+    buildCommand: pip install -r requirements.txt
+    startCommand: python vera_bot_sqlite.py
+    autoDeploy: true
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: GROUP_CHAT_ID
+        value: "-4875403747"
+      - key: ADMIN_USERNAMES
+        value: "Arailon,AndreyGrebeshchikov"
+      - key: TZ
+        value: "Europe/Moscow"
+    # Если нужен постоянный диск для SQLite:
+    # disks:
+    #   - name: data
+    #     mountPath: /data
+    #     sizeGB: 1
