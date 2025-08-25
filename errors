@@ -1,0 +1,168 @@
+2025-08-25 17:47:53,608 - httpx - INFO - HTTP Request: POST https://api.telegram.org/botYOUR_TELEGRAM_BOT_TOKEN/getMe "HTTP/1.1 404 Not Found"
+2025-08-25 17:47:53,609 - telegram.ext - ERROR - Network Retry Loop (Bootstrap Initialize Application): Invalid token. Aborting retry loop.
+Traceback (most recent call last):
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 845, in initialize
+    await self.get_me()
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 1981, in get_me
+    return await super().get_me(
+           ^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 976, in get_me
+    result = await self._post(
+             ^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.InvalidToken: Not Found
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_utils\networkloop.py", line 93, in do_action
+    return await action_cb()
+           ^^^^^^^^^^^^^^^^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_application.py", line 489, in initialize
+    await self.bot.initialize()
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 316, in initialize
+    await super().initialize()
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 847, in initialize
+    raise InvalidToken(f"The token `{self._token}` was rejected by the server.") from exc
+telegram.error.InvalidToken: The token `YOUR_TELEGRAM_BOT_TOKEN` was rejected by the server.
+Traceback (most recent call last):
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 845, in initialize
+    await self.get_me()
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 1981, in get_me
+    return await super().get_me(
+           ^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 976, in get_me
+    result = await self._post(
+             ^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 698, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 727, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\request\_baserequest.py", line 197, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\request\_baserequest.py", line 374, in _request_wrapper
+    raise exception
+telegram.error.InvalidToken: Not Found
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_application.py", line 1049, in __run
+    loop.run_until_complete(self._bootstrap_initialize(max_retries=bootstrap_retries))
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\nest_asyncio.py", line 98, in run_until_complete
+    return f.result()
+           ~~~~~~~~^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\asyncio\futures.py", line 199, in result
+    raise self._exception.with_traceback(self._exception_tb)
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 304, in __step_run_and_handle_result
+    result = coro.send(None)
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_application.py", line 1014, in _bootstrap_initialize
+    await network_retry_loop(
+    ...<4 lines>...
+    )
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_utils\networkloop.py", line 115, in network_retry_loop
+    if not await do_action():
+           ^^^^^^^^^^^^^^^^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_utils\networkloop.py", line 93, in do_action
+    return await action_cb()
+           ^^^^^^^^^^^^^^^^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_application.py", line 489, in initialize
+    await self.bot.initialize()
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_extbot.py", line 316, in initialize
+    await super().initialize()
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\_bot.py", line 847, in initialize
+    raise InvalidToken(f"The token `{self._token}` was rejected by the server.") from exc
+telegram.error.InvalidToken: The token `YOUR_TELEGRAM_BOT_TOKEN` was rejected by the server.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\artem\Downloads\heper.py", line 277, in <module>
+    asyncio.get_event_loop().run_until_complete(main())
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\nest_asyncio.py", line 98, in run_until_complete
+    return f.result()
+           ~~~~~~~~^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\asyncio\futures.py", line 199, in result
+    raise self._exception.with_traceback(self._exception_tb)
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\asyncio\tasks.py", line 304, in __step_run_and_handle_result
+    result = coro.send(None)
+  File "c:\Users\artem\Downloads\heper.py", line 271, in main
+    await app.run_polling()
+          ~~~~~~~~~~~~~~~^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_application.py", line 839, in run_polling
+    return self.__run(
+           ~~~~~~~~~~^
+        updater_coroutine=self.updater.start_polling(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        close_loop=close_loop,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\site-packages\telegram\ext\_application.py", line 1079, in __run
+    loop.close()
+    ~~~~~~~~~~^^
+  File "c:\Users\artem\AppData\Local\Programs\Python\Python313\Lib\asyncio\proactor_events.py", line 686, in close
+    raise RuntimeError("Cannot close a running event loop")
+RuntimeError: Cannot close a running event loop
+PS C:\Users\artem\Downloads> 
