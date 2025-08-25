@@ -1,4 +1,4 @@
-# VERA_Bot.py (исправленный)
+# VERA_Bot.py (исправленный запуск — поддержка среды с уже запущенным loop)
 import asyncio
 import re
 import sqlite3
@@ -110,11 +110,9 @@ async def search_guest(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = text.lower()
     digits_q = re.sub(r"\D", "", text)
 
-    # Для удобства: если набор цифр начинается с 8 -> нормализуем в 7
     if digits_q.startswith("8"):
         digits_q = "7" + digits_q[1:]
 
-    # Заберём всех гостей и отфильтруем
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT id, fullname, phone, email, source, note FROM guests ORDER BY id DESC")
@@ -126,13 +124,11 @@ async def search_guest(update: Update, context: ContextTypes.DEFAULT_TYPE):
         gid, fullname, phone, email, source, note = row
         full_text = " ".join([str(fullname or ""), str(email or ""), str(phone or "")]).lower()
 
-        # Если запрос содержит @ — считаем это поиск по email (подстрока, нечувствительно к регистру)
         if "@" in text:
             if email and q in (email or "").lower():
                 results.append(row)
                 continue
 
-        # По цифрам телефона (если в запросе есть >=3 цифры)
         if len(digits_q) >= 3:
             phone_digits = re.sub(r"\D", "", phone or "")
             if phone_digits.startswith("8"):
@@ -141,7 +137,6 @@ async def search_guest(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 results.append(row)
                 continue
 
-        # По ФИО / фамилии: проверяем, что все слова запроса встречаются в fullname
         name_words = q.split()
         if fullname:
             fullname_l = fullname.lower()
@@ -150,7 +145,6 @@ async def search_guest(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 results.append(row)
                 continue
 
-        # fallback: общая подстрока
         if q in full_text:
             results.append(row)
             continue
@@ -159,7 +153,6 @@ async def search_guest(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ По вашему запросу ничего не найдено.", reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
 
-    # Ограничим вывод — максимум 20 карточек
     max_show = 20
     shown = 0
     for row in results:
@@ -239,7 +232,6 @@ async def email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text.lower() == "пропустить":
         context.user_data["email"] = None
     else:
-        # простая валидация email
         if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", text):
             await update.message.reply_text("❌ Некорректный email. Введите снова или нажмите «Пропустить».")
             return EMAIL
@@ -312,7 +304,6 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= /start: ЛС и ГРУППА раздельно =================
 async def start_private(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # меню для гостей (личка)
     kb = [["Забронировать столик"], ["Посмотреть меню"], ["Фотографии"], ["Связаться с бариста"]]
     await update.message.reply_text(
         f"Добрый день, {update.effective_user.first_name}! 👋\n"
@@ -321,7 +312,6 @@ async def start_private(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def start_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # меню для группы (сотрудники)
     kb = [
         ["➕Добавить гостя"],
         ["📋 Список гостей"],
@@ -358,7 +348,6 @@ async def guest_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update):
         return
 
-    # Пытаемся отправить список в ЛС админа
     u = update.effective_user
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -373,7 +362,6 @@ async def guest_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Напишите боту в личку сначала, чтобы он мог отправлять вам сообщения.")
         return
 
-    # Формируем порционно (чтобы не упереться в лимиты)
     chunk = []
     total_texts = []
     for row in rows:
@@ -465,8 +453,28 @@ async def main():
     scheduler.add_job(task_1800, "cron", hour=18, minute=0, args=[app])
     scheduler.start()
 
-    # --- запуск бота (упрощённо) ---
-    await app.run_polling()
+    # --- безопасный асинхронный запуск (не использует run_until_complete) ---
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling()
+
+    try:
+        # держим задачу живой пока не остановят (Ctrl+C / SIGTERM)
+        await asyncio.Event().wait()
+    finally:
+        # корректный shutdown
+        await app.updater.stop()
+        await app.stop()
+        await app.shutdown()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Обычный запуск
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        # Если loop уже запущен (например, в VSCode debugpy), запланируем main в текущем loop
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(main())
+        else:
+            raise
