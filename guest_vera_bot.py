@@ -1,13 +1,43 @@
 import re
+import sqlite3
 import asyncio
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    ReplyKeyboardMarkup, KeyboardButton,
+    InlineKeyboardMarkup, InlineKeyboardButton
+)
 from aiogram.filters import Command
+from aiogram.client.default import DefaultBotProperties
+
 
 API_TOKEN = "YOUR_BOT_TOKEN"
 
-bot = Bot(token=API_TOKEN, parse_mode="HTML")
+# aiogram 3.7+ — parse_mode задаётся так:
+bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
+
+# ---------- База данных ----------
+def init_db():
+    conn = sqlite3.connect("vera.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS bookings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        fullname TEXT,
+        datetime TEXT
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+def add_booking(user_id: int, fullname: str, datetime_str: str):
+    conn = sqlite3.connect("vera.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO bookings (user_id, fullname, datetime) VALUES (?, ?, ?)",
+                   (user_id, fullname, datetime_str))
+    conn.commit()
+    conn.close()
 
 
 # ---------- Главное меню ----------
@@ -42,28 +72,21 @@ async def booking_start(message: types.Message):
 def normalize_datetime(text: str) -> str:
     """Форматируем дату и время в единый вид: ДД.ММ.ГГГГ ЧЧ:ММ"""
     text = text.strip()
-    
-    # Заменим все разделители на пробел
     text = re.sub(r"[\/\.:-]", " ", text)
-
     parts = text.split()
     date, time = None, None
 
-    # Дата
     if len(parts) >= 2:
-        date = parts[0]
-        time = parts[1]
+        date, time = parts[0], parts[1]
     elif len(parts) == 1:
-        if ":" in parts[0] or len(parts[0]) in [4]:  # 1830 → 18:30
+        if ":" in parts[0] or len(parts[0]) in [4]:
             time = parts[0]
         else:
             date = parts[0]
 
-    # Формат времени
     if time:
         time = re.sub(r"(\d{1,2})(\d{2})", r"\1:\2", time) if time.isdigit() else time
 
-    # Формат даты
     if date:
         d = re.findall(r"\d+", date)
         if len(d) == 2:
@@ -72,18 +95,22 @@ def normalize_datetime(text: str) -> str:
         elif len(d) == 3:
             day, month, year = d
             date = f"{day.zfill(2)}.{month.zfill(2)}.{year}"
-    
+
     return f"{date or '??.??.????'} {time or '??:??'}"
 
 
 @dp.message()
 async def handle_booking_input(message: types.Message):
-    if any(word in message.text for word in ["забронировать", "стол", "место"]):
-        return  # чтобы не ловило случайные сообщения
+    text = message.text.strip()
+    normalized = normalize_datetime(text)
 
-    normalized = normalize_datetime(message.text)
-    if "??" not in normalized:
-        await message.answer(f"Ваше бронирование: <b>{normalized}</b>\nМы свяжемся с вами для подтверждения ✅")
+    if "??" not in normalized:  # если дата корректна
+        fullname = message.from_user.full_name
+        add_booking(message.from_user.id, fullname, normalized)
+        await message.answer(
+            f"Ваше бронирование: <b>{normalized}</b>\n"
+            f"Спасибо, {fullname}! Мы свяжемся с вами для подтверждения ✅"
+        )
     else:
         await message.answer("Не удалось распознать дату или время, попробуйте ещё раз.")
 
@@ -121,7 +148,9 @@ async def contacts(message: types.Message):
 
 # ---------- Запуск ----------
 async def main():
+    init_db()
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
